@@ -155,7 +155,6 @@ def user_favorites(user_id):
     favorite_species = db.session.execute(
         select(Favorites_species).where(Favorites_species.user_id == user_id)
     ).scalars().all()
-    
 
     return jsonify({
         "username": user.username,
@@ -166,11 +165,13 @@ def user_favorites(user_id):
         "favorite species": list(map(lambda favorite_species: favorite_species.serialize(), favorite_species))
     }), 200
 
+
 @app.route('/<case>/<int:case_id>', methods=['GET'])
 def handle_cases_singular(case, case_id):
     match case:
         case "planets":
-            planet = db.session.execute(select(Planets).where(Planets.id == case_id)).scalar_one_or_none()
+            planet = db.session.execute(select(Planets).where(
+                Planets.id == case_id)).scalar_one_or_none()
             response_body = {
                 "planet": planet.serialize()
             }, 200
@@ -205,50 +206,63 @@ def handle_cases_singular(case, case_id):
 
     return jsonify(response_body)
 
-@app.route('/favorite/<case>/<int:case_id>', methods=['POST', 'DELETE'])
-def handle_favorites(case, case_id):
+
+@app.route('/favorite/<int:user_id>/<case>/<int:case_id>', methods=['POST', 'DELETE'])
+def handle_favorites(user_id, case, case_id):
     response_body = ""
     if request.method == "DELETE":
+        user = db.session.execute(select(User).where(
+            User.id == user_id)).scalar_one_or_none()
         match case:
             case "planets":
                 planet = db.session.execute(select(Planets).where(
                     Planets.id == case_id)).scalar_one_or_none()
-                db.session.delete(planet)
+                favorite_planet = Favorites_planets(
+                    planets_id=planet.id, user_id=user.id)
+                db.session.delete(favorite_planet)
                 db.session.commit()
                 response_body = {
-                    "planet": planet.name + "Has been deleted from favorites"
+                    "planet": planet.name + " Has been deleted from favorites"
                 }, 200
             case "characters":
                 character = db.session.execute(select(Characters).where(
                     Characters.id == case_id)).scalar_one_or_none()
-                db.session.delete(character)
+                favorite_character = Favorites_characters(
+                    character_id=character.id, user_id=user.id)
+                db.session.delete(favorite_character)
                 db.session.commit()
                 response_body = {
-                    "character": character.name + "Has been deleted from favorites"
+                    "character": character.name + " Has been deleted from favorites"
                 }, 200
             case "films":
                 film = db.session.execute(select(Films).where(
                     Films.id == case_id)).scalar_one_or_none()
-                db.session.delete(film)
+                favorite_film = Favorites_films(
+                    films_id=film.id, user_id=user.id)
+                db.session.delete(favorite_film)
                 db.session.commit()
                 response_body = {
-                    "film": film.title + "Has been deleted from favorites"
+                    "film": film.title + " Has been deleted from favorites"
                 }, 200
             case "vehicles":
                 vehicle = db.session.execute(select(Vehicles).where(
                     Vehicles.id == case_id)).scalar_one_or_none()
-                db.session.delete(vehicle)
+                favorite_vehicle = Favorites_vehicles(
+                    vehicles_id=vehicle.id, user_id=user.id)
+                db.session.delete(favorite_vehicle)
                 db.session.commit()
                 response_body = {
-                    "vehicle": vehicle.name + "Has been deleted from favorites"
+                    "vehicle": vehicle.name + " Has been deleted from favorites"
                 }, 200
             case "species":
                 species = db.session.execute(select(Species).where(
                     Species.id == case_id)).scalar_one_or_none()
-                db.session.delete(species)
+                favorite_species = Favorites_species(
+                    species_id=species.id, user_id=user.id)
+                db.session.delete(favorite_species)
                 db.session.commit()
                 response_body = {
-                    "species": species.name + "Has been deleted from favorites"
+                    "species": species.name + " Has been deleted from favorites"
                 }, 200
             case _:
                 response_body = {
@@ -256,7 +270,7 @@ def handle_favorites(case, case_id):
                 }, 400
     else:
         user = db.session.execute(select(User).where(
-            User.id == case_id)).scalar_one_or_none()
+            User.id == user_id)).scalar_one_or_none()
         match case:
             case "planets":
                 planet = db.session.execute(select(Planets).where(
@@ -266,7 +280,7 @@ def handle_favorites(case, case_id):
                 db.session.add(favorite_planet)
                 db.session.commit()
                 response_body = {
-                    "planet": planet.name + "Has been added to favorites"
+                    "planet": planet.name + " Has been added to favorites"
                 }, 200
             case "characters":
                 character = db.session.execute(select(Characters).where(
@@ -276,7 +290,7 @@ def handle_favorites(case, case_id):
                 db.session.add(favorite_character)
                 db.session.commit()
                 response_body = {
-                    "character": character.name + "Has been added to favorites"
+                    "character": character.name + " Has been added to favorites"
                 }, 200
             case "films":
                 film = db.session.execute(select(Films).where(
@@ -286,7 +300,7 @@ def handle_favorites(case, case_id):
                 db.session.add(favorite_film)
                 db.session.commit()
                 response_body = {
-                    "film": film.title + "Has been added to favorites"
+                    "film": film.title + " Has been added to favorites"
                 }, 200
             case "vehicles":
                 vehicle = db.session.execute(select(Vehicles).where(
@@ -296,7 +310,7 @@ def handle_favorites(case, case_id):
                 db.session.add(favorite_vehicle)
                 db.session.commit()
                 response_body = {
-                    "vehicle": vehicle.name + "Has been added to favorites"
+                    "vehicle": vehicle.name + " Has been added to favorites"
                 }, 200
             case "species":
                 species = db.session.execute(select(Species).where(
@@ -306,13 +320,14 @@ def handle_favorites(case, case_id):
                 db.session.add(favorite_species)
                 db.session.commit()
                 response_body = {
-                    "species": species.name + "Has been added to favorites"
+                    "species": species.name + " Has been added to favorites"
                 }, 200
             case _:
                 response_body = {
                     "Operation not found"
                 }, 400
     return jsonify(response_body)
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
