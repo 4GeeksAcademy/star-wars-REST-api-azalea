@@ -91,35 +91,35 @@ def handle_cases(case):
                 db.session.add(planet)
                 db.session.commit()
                 response_body = {
-                    "planet": planet.name + "Has been added"
+                    "planet": planet.name + " Has been added"
                 }, 200
             case "characters":
                 character = Characters(**request_body)
                 db.session.add(character)
                 db.session.commit()
                 response_body = {
-                    "character": character.name + "Has been added"
+                    "character": character.name + " Has been added"
                 }, 200
             case "films":
                 film = Films(**request_body)
                 db.session.add(film)
                 db.session.commit()
                 response_body = {
-                    "film": film.title + "Has been added"
+                    "film": film.title + " Has been added"
                 }, 200
             case "vehicles":
                 vehicle = Vehicles(**request_body)
                 db.session.add(vehicle)
                 db.session.commit()
                 response_body = {
-                    "vehicle": vehicle.name + "Has been added"
+                    "vehicle": vehicle.name + " Has been added"
                 }, 200
             case "species":
                 species = Species(**request_body)
                 db.session.add(species)
                 db.session.commit()
                 response_body = {
-                    "species": species.name + "Has been added"
+                    "species": species.name + " Has been added"
                 }, 200
             case _:
                 response_body = {
